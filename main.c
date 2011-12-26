@@ -121,27 +121,28 @@ void get_command(char command[100])
 	if (command[strlen(command) - 1] == '\n')
 		command[strlen(command) - 1] = '\0';
 
-	//printf("Right after getting: %s\n", command);
+	printf("Right after getting: %s\n", command);
 
 }
 
 // split_command
-//	- splits command into seperate words seperated by the space character ' '
+//	- splits command into separate words separated by the space character ' '
 void split_command(char command[100],char *word[100])
 {
 
-	// Each word (seperated by a space) will be given a pointer from the array 'words'
-	int i = 1;
+	// Each word (separated by a space) will be given a pointer stored in the array 'words'
+	int i= 1;
 
+	printf("Splitting: %s\n", command);
 	// First word
 	word[0] = strtok(command, " ");
 	// The rest
-	while (word[i] != NULL)				// NOTE: strtok will return NULL when it reaches the end
-	{
-		word[i] = strtok(NULL, " ");
-
-		i++;
-	}
+	while ((word[i] = strtok(NULL, " ")) != NULL)	i++;			// NOTE: strtok will return NULL when it reaches the end
+//	{
+	//	word[i] = strtok(NULL, " ");
+    //	printf("Found: %s\n", word[i]);
+	//	i++;
+//	}
 
 }
 
