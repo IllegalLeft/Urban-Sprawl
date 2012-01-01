@@ -39,11 +39,26 @@ void printl()
 {
 	printf("\n");
 }
+// clearscr
+//	- prints a large amount of new lines to free up screen space
+void clearscr()
+{
+	for(int i = 0; i < 100; i++)
+		printf("\n");
+}
+//
+//
+void pause()
+{
+	printf("\nPress any key...\n");
+	scanf("%*c");
+	fflush(stdin);
+}
 
 
 ////////////////
 //  COMMANDS  //
-////////////////////
+////////////////
 
 //// MAP
 //	- "map" command
@@ -63,8 +78,10 @@ void print_map(char map[20][20], int char_position[2], char *word[100])
 				else
 					printf("%c", map[i][j]);
 			}
-		printl();
+			printl();
 		}
+		pause();
+
 	}
 	else if (strcmp("legend", word[1]) == 0)
 	{
@@ -78,6 +95,7 @@ void print_map(char map[20][20], int char_position[2], char *word[100])
 		       "P	Police Station\n" 
 		       "S	Shop\n" 
 		       "&	Debris\n");
+		pause();
 	}
 }
 
@@ -91,18 +109,22 @@ int move(char *direction, int char_position[2])
 	if (direction == NULL)
 	{
 		printf("Please specify a direction.\n");
+		pause();
 		return 1;
 	}
 	if (((strcmp("up", direction) == 0) || (strcmp("north", direction) == 0)) && (char_position[0] != 0))
 		char_position[0]--;
 	else if (((strcmp("down", direction) == 0) || (strcmp("south", direction) == 0)) && (char_position[0] != 19))
 		char_position[0]++;
-	else if ((strcmp("left", direction) == 0) && (char_position[1] != 0))
+	else if (((strcmp("left", direction) == 0) || (strcmp("west", direction) == 0)) && (char_position[1] != 0))
 		char_position[1]--;
-	else if ((strcmp("right", direction) == 0) && (char_position[1] != 19))
+	else if (((strcmp("right", direction) == 0) || (strcmp("east", direction) == 0)) && (char_position[1] != 19))
 		char_position[1]++;
 	else
-		printf("Direction not recognized.");
+	{
+		printf("Direction not recognized\n");
+		pause();
+	}
 
 	return 0;
 
@@ -113,9 +135,11 @@ int move(char *direction, int char_position[2])
 void tile_info(char map[20][20], int char_position[2])
 {
 
-	printf("tile: %c\n", map[char_position[0]][char_position[1]]);
+	char current_tile = map[char_position[0]][char_position[1]];
 
-	switch (map[char_position[0]][char_position[1]])
+	printf("tile: %c\n", current_tile);
+
+	switch (current_tile)
 	{
 		case '=':
 			printf("You are currently on a road that goes from the West to East end of the city\n");
@@ -143,7 +167,10 @@ void tile_info(char map[20][20], int char_position[2])
 			break;
 		default:
 			printf("Map tile not recognized.\n");
+
 	}
+
+	pause();
 }
 
 ////////////////////
@@ -175,7 +202,7 @@ void split_command(char command[100],char *word[100])
 	// Each word (separated by a space) will be given a pointer stored in the array 'words'
 	int i= 1;
 
-	printf("Splitting: %s\n", command);
+	//printf("Splitting: %s\n", command);
 	// First word
 	word[0] = strtok(command, " ");
 	// The rest
@@ -195,15 +222,20 @@ int check_command(char *word[100], char map[20][20], int char_position[2])
 	if (word[0] == NULL)
 		return 1;
 	//MAP
-	if (strcmp("map", word[0]) == 0)
+	else if (strcmp("map", word[0]) == 0)
 		print_map(map, char_position, word);
 	//WALK
-	if (strcmp("walk", word[0]) == 0)
+	else if (strcmp("walk", word[0]) == 0)
 		move(word[1], char_position);
 	//TILE INFO
-	if ((strcmp("tile", word[0]) == 0) && (strcmp("info", word[1]) == 0))
+	else if ((strcmp("tile", word[0]) == 0) && (strcmp("info", word[1]) == 0))
 		tile_info(map, char_position);
-	
+	else
+	{
+		printf("Command not recognized.\n");
+		pause();
+	}
+
 	return 0;
 }
 
@@ -252,7 +284,7 @@ int main(void)
 	do 
 	{
 
-		//printl();
+		clearscr();
 
 		printf("%d, %d \n", char_position[0], char_position[1]);
 		get_command(command);
