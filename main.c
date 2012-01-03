@@ -5,7 +5,7 @@
  BY: SAMI VOLK
 ================
 
-	2011
+	2011-2012
 */
 
 // TILES
@@ -35,13 +35,15 @@
 
 struct playercharacteristics
 {
-	//char *name;
+	char name[100];
 	int position[2];
 	char map[20][20];
 
-	int health[2];
+	int health[2];	
+	float money;
 	//int intelligence;
 	//int stealth;
+	//int charisma
 	
 	//int weapons[5];
 };
@@ -63,7 +65,7 @@ void clearscr()
 //
 void pause()
 {
-	printf("\nPress any key...\n");
+	printf("\nPress Enter...\n");
 	scanf("%*c");
 	fflush(stdin);
 }
@@ -206,6 +208,21 @@ int enter(char map[20][20], int position[2], int health[])
 	
 }
 
+//// INVENTORY
+//	- "inventory" command
+//	- presents the user his/her inventory including stats and weapons
+void inventory(int position[2], char *name, int health[2], float money, char *word)
+{
+	clearscr();
+	printf("Name: %s\n", name);
+	printf("Position: %d, %d \n", position[0], position[1]);
+	printf("Health: %d / %d\n", health[0], health[1]);
+	printf("Money: $%.2f\n", money);
+	printl();
+	pause();
+	clearscr();
+}
+
 //// MAP
 //	- "map" command
 //	- prints the map
@@ -326,7 +343,8 @@ int move(char *direction, int position[2])
 
 // check_command
 //	- checks the command against the programmed commands
-int check_command(char *word[100], char map[20][20], int position[2], int health[2])
+int check_command(char *word[100], struct playercharacteristics * player)
+//struct playercharacteristics *player
 {
 
 	//printf("check_command word[0]: %s\n", word[0]);
@@ -337,16 +355,18 @@ int check_command(char *word[100], char map[20][20], int position[2], int health
 		return 1;
 	// ENTER
 	else if (strcmp("enter", word[0]) == 0)
-		enter(map, position, health);
+		enter(player->map, player->position, player->health);
+	else if (strcmp("inventory", word[0]) == 0)
+		inventory(player->position, player->name, player->health, player->money, *word);
 	// MAP
 	else if (strcmp("map", word[0]) == 0)
-		print_map(map, position, word);
+		print_map(player->map, player->position, word);
 	// TILE INFO
 	else if ((strcmp("tile", word[0]) == 0) && (strcmp("info", word[1]) == 0))
-		tile_info(map, position);
+		tile_info(player->map, player->position);
 	// WALK
 	else if (strcmp("walk", word[0]) == 0)
-		move(word[1], position);
+		move(word[1], player->position);
 	else
 	{
 		printf("Command not recognized.\n");
@@ -361,6 +381,8 @@ int main(void)
 
 	struct playercharacteristics player = 
 	{
+		// Name
+		"\0",
 		// Position
 		{0, 0},
 		// Map
@@ -389,6 +411,9 @@ int main(void)
 		
 		// Health (actual, full)
 		{100, 100},
+
+		// Money
+		100,
 		
 	};
 
@@ -400,13 +425,53 @@ int main(void)
 	char *word[100];
 
 	/////////////////////////
+	// Main Menu
+	do
+	{
+		printf("Urban Sprawl\n");
+		printf("By: Sami Volk	2012\n");
+		pause();
+		clearscr();
+		do
+		{
+			printf("Please type in one of the commands: \n");
+			printf("NEW - starts a new game \t\t");
+			printf("QUIT - quits game");
+
+			get_command(command);
+
+			// check for "exit" command.
+			if ((strcmp("exit", command) == 0) || (strcmp("quit", command) == 0))
+			{
+				printf("Good bye!");
+				pause();
+				return 0;
+			}
+			else if (strcmp("new", command) == 0)
+			{
+				printf("What is your name?\n");
+				fgets(player.name, 100, stdin);
+				fflush(stdin);
+				break;
+			}
+		}while (1);
+
+		break;
+
+	}while (1);
+
+	/////////////////////////
 	// Main game loop	
 	do 
 	{
 
 		clearscr();
 
-		printf("%d, %d \n", player.position[0], player.position[1]);
+		printf("name: %s\n", player.name);
+		//printf("Position: %d, %d \n", player.position[0], player.position[1]);
+		//printf("Health: %d / %d\n", player.health[0], player.health[1]);
+		//printf("Money: $%.2f\n", player.money);
+		//printl();
 		get_command(command);
 
 		// check for "exit" command.
@@ -418,7 +483,7 @@ int main(void)
 		}
 
 		split_command(command, word);
-		check_command(word, player.map, player.position, player.health);
+		check_command(word, &player);
 
 	} while (1);
 
