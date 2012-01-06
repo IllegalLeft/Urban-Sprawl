@@ -117,12 +117,14 @@ void split_command(char command[100],char *word[100])
 //// ENTER
 //	- "enter" command
 //	- enters the building on the current tile
-int enter(char map[20][20], int position[2], int health[])
+int enter(char map[20][20], int position[2], int health[2])
 {
 
 	char current_tile = map[position[0]][position[1]];
 	char command[100];
 	char *word[100];
+
+	float heal_cost = health[1] - health[0];
 
 	switch (current_tile)
 	{
@@ -130,14 +132,14 @@ int enter(char map[20][20], int position[2], int health[])
 			while (1)
 			{
 				printf("You have entered the hospital.\n");
-				printf("Healing yourself will cost: $10.\n");
+				printf("Healing yourself fully will cost: $%.2d.\n" heal_cost);
 				
 				get_command(command);
 				split_command(command, word);
 
-				if (strcmp("heal", word[0]) == 0)
+				if ((strcmp("heal", word[0]) == 0) && (health[0] < health[1]))
 				{
-					printf("This will cost you: $10. Carry on?  (yes / no)\n");
+					printf("This will cost you: $%.2f. Carry on?  (yes / no)\n", heal_cost);
 					get_command(command);
 					split_command(command, word);
 
@@ -422,7 +424,7 @@ int main(void)
 		},
 		
 		// Health (actual, full)
-		{100, 100},
+		{50, 100},
 
 		// Money
 		100,
