@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 
 struct playercharacteristics
 {
@@ -41,9 +42,11 @@ struct playercharacteristics
 
 	int health[2];	
 	float money;
+
+	//int skill_points;
 	//int intelligence;
 	//int stealth;
-	//int charisma
+	//int charisma;
 	
 	//int weapons[5];
 };
@@ -62,7 +65,7 @@ void clearscr()
 		printf("\n");
 }
 //
-//
+// pause
 void pause()
 {
 	printf("\nPress Enter...\n");
@@ -170,6 +173,7 @@ int enter(char map[20][20], int position[2], int health[])
 		case 'S':
 			while (1)
 			{
+				clearscr();
 				printf("You have entered the shop.\n");
 
 				get_command(command);
@@ -269,7 +273,7 @@ void tile_info(char map[20][20], int position[2])
 
 	char current_tile = map[position[0]][position[1]];
 
-	printf("tile: %c\n", current_tile);
+	//printf("Tile: %c\n", current_tile);
 
 	switch (current_tile)
 	{
@@ -305,7 +309,7 @@ void tile_info(char map[20][20], int position[2])
 
 	}
 
-	pause();
+	//pause();
 }
 
 //// WALK
@@ -356,6 +360,14 @@ int check_command(char *word[100], struct playercharacteristics * player)
 	// ENTER
 	else if (strcmp("enter", word[0]) == 0)
 		enter(player->map, player->position, player->health);
+	// EXIT
+	else if ((strcmp("exit", word[0]) == 0) || (strcmp("quit", word[0]) == 0))
+	{
+		printf("Good bye!");
+		pause();
+		exit(0);
+	}
+	// INVENTORY
 	else if (strcmp("inventory", word[0]) == 0)
 		inventory(player->position, player->name, player->health, player->money, *word);
 	// MAP
@@ -436,9 +448,10 @@ int main(void)
 		{
 			printf("Please type in one of the commands: \n");
 			printf("NEW - starts a new game \t\t");
-			printf("QUIT - quits game");
+			printf("QUIT - quits game\n");
 
 			get_command(command);
+			clearscr();
 
 			// check for "exit" command.
 			if ((strcmp("exit", command) == 0) || (strcmp("quit", command) == 0))
@@ -452,6 +465,7 @@ int main(void)
 				printf("What is your name?\n");
 				fgets(player.name, 100, stdin);
 				fflush(stdin);
+				clearscr();
 				break;
 			}
 		}while (1);
@@ -465,25 +479,21 @@ int main(void)
 	do 
 	{
 
-		clearscr();
-
-		printf("name: %s\n", player.name);
+		//printf("name: %s\n", player.name);
 		//printf("Position: %d, %d \n", player.position[0], player.position[1]);
 		//printf("Health: %d / %d\n", player.health[0], player.health[1]);
 		//printf("Money: $%.2f\n", player.money);
 		//printl();
+
+		//tile_info(player.map, player.position);
+		//printl();
+
 		get_command(command);
-
-		// check for "exit" command.
-		if ((strcmp("exit", command) == 0) || (strcmp("quit", command) == 0))
-		{
-			printf("Good bye!");
-			pause();
-			return 0;
-		}
-
+		clearscr();
 		split_command(command, word);
 		check_command(word, &player);
+
+		clearscr();
 
 	} while (1);
 
