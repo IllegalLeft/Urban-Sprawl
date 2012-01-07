@@ -23,7 +23,7 @@
 #define hospital	72
 // 'P' = 80		Police
 #define police		80
-// 'S' = 83		Shop
+// 'S' = 83		General Store
 #define shop		83
 // '&' = 38		Debris
 //#define debris ##
@@ -43,10 +43,10 @@ struct playercharacteristics
 	int health[2];	
 	float money;
 
-	//int skill_points;
-	//int intelligence;
-	//int stealth;
-	//int charisma;
+	int skill_points;
+	int intelligence;
+	int stealth;
+	int charisma;
 	
 	//int weapons[5];
 };
@@ -190,7 +190,8 @@ int enter(char map[20][20], int position[2], int health[2])
 					if (strcmp("yes", word[0]) == 0)
 					{
 						//Heal
-						printf("You have been healed! (NOT REALLY)\n");
+						health[0] = health[1];
+						printf("You have been healed!\n");
 					}
 				}
 				else if (strcmp("exit", word[0]) == 0)
@@ -429,6 +430,15 @@ int main(void)
 		// Money
 		100,
 		
+		// Skill_points;
+		10,
+		// Intelligence;
+		1,
+		// Stealth;
+		1,
+		// Charisma;
+		1,
+
 	};
 
 
