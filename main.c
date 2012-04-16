@@ -6,9 +6,21 @@
 ================
 
 	2011-2012
+
+NOTES:
+- Crappy navigating system - Gonna have to go with old-school room/exits system.
+- Needs a database or a huge array to store rooms and objects...
+
+UNFINISHED:
+- command recognizer
+- system
+
+BUGS:
+
+
 */
 
-// TILES
+//// TILES
 // '#' = 35		Character
 #define character	35 
 // '=' = 61		Horizontal road
@@ -25,8 +37,45 @@
 #define police		80
 // 'S' = 83		General Store
 #define shop		83
+// 'L' = ##		Liquor Store
+//#define LCBO ##
+// 'G' = ##		Gun Shop
+//#define gunstore ##
 // '&' = 38		Debris
 //#define debris ##
+
+#define NUM_OF_COMMANDS		7
+/*
+	COMMANDS
+	--------
+	enter
+	help
+	inventory
+	map	
+	tile info
+	walk
+	exit	
+*/
+#define MAX_COMMAND_LENGTH	10
+
+
+// Number of Items
+#define NUM_OF_ITEMS	8
+// Number of Weapons
+#define NUM_OF_WEAPONS	6
+
+// SHOP ITEMS
+#define shopitem1	1
+#define shopitem2	2
+#define shopitem3	3
+
+// GUN SHOP ITEMS
+#define gunshopitem1	3
+#define gunshopitem2	4
+#define gunshopitem3	5
+#define gunshopammo1	5
+#define gunshopammo2	6
+#define gunshopammo3	7
 
 // STANDARD HEADERS
 #include <stdio.h>
@@ -37,18 +86,57 @@
 struct playercharacteristics
 {
 	char name[100];
-	int position[2];
+	int position[2];	// {x, y}   NOTE: origin is top left
 	char map[20][20];
 
-	int health[2];	
-	float money;
+	int health[2];		// {actual, full}
+	float money;		// in Canadian dollars!
 
 	int skill_points;
 	int intelligence;
 	int stealth;
 	int charisma;
 	
-	//int weapons[5];
+	int equipped_weapon;	// ID
+	int equipped_ammo[2];	// ID, amount
+	int weapons[10][2]; 	// { {ID, amount}, ...}
+	int items[10][2];		// { {ID, amount}, ...}
+};
+
+struct item
+{
+	int ID;
+	char name[100];
+	int bulk;
+	int ammo;		// 1 if YES, 0 if NO
+	float price;
+}item_ref[NUM_OF_ITEMS] =
+{
+	{0, "nothing", 1, 0, 0.00},
+	{1, "chips", 1, 0, 2.50},
+	{2, "cigarettes", 1, 0, 2.75},
+	{3, "soda", 1, 0, 1.50},
+	{4, "book", 1, 0, 29.00},
+	{5, "9mm", 5, 1, 14.50},
+	{6, ".45ACP", 15, 1, 12.33},
+	{7, "7.62mm", 5, 1, 20.55}
+};
+
+struct weapon
+{
+	int ID;			// to get index/ID from name
+	char name[100];
+	int attack;
+	int ammoID;		// 0 if not needed
+	float price;
+}weapon_ref[NUM_OF_WEAPONS] =
+{
+	{0, "nothing", 0, 0, 0.00},
+	{1, "knife", 3, 0, 5.00},
+	{2, "bat", 4, 0, 15.00},
+	{3, "pistol", 10, 5, 125.25},
+	{4, "SMG", 15, 6, 256.00},
+	{5, "rifle", 22, 7, 329.99}
 };
 
 // printl
@@ -61,7 +149,7 @@ void printl()
 //	- prints a large amount of new lines to free up screen space
 void clearscr()
 {
-	for(int i = 0; i < 100; i++)
+	for(int i = 0; i < 50; i++)
 		printf("\n");
 }
 //
@@ -110,6 +198,112 @@ void split_command(char command[100],char *word[100])
 
 }
 
+// recognize_command
+//	- searches an array of commands to recognize commands that have been only partially typed
+/*
+void recognize_command(char *word[100])
+{
+
+	for (int character = 0; character > 10; character++)
+	{
+		for (int command_num = 0; command_num >= MAX_NUM_OF_COMMANDS; commmand_num ++)
+		{
+			if (word[command_num] == )
+		}
+	}
+
+}
+*/
+
+
+// aquire
+//	- adds an certain item to your inventory
+int aquire(int backpack[10][2], int ID, int amount)
+{
+	// First check...
+	for(int i = 0; i < 10 ; i++)
+	{
+		// Found item already in backpack array
+		if (backpack[i][0] == ID)
+		{
+			backpack[i][1] += amount;
+			return 0;
+		}
+	}
+
+	// Second check...
+	for(int i = 0; i < 10 ; i++)
+	{
+		// Found empty spot for item in backpack array
+		if (backpack[i][0] == 0)
+		{
+			backpack[i][0] = ID;
+			backpack[i][1] += amount;
+			//printf("aquire(): %dx%d@%d\n", backpack[i][1], backpack[i][0], i);
+			return 0;
+		}
+	}
+
+	return 0;
+}
+// drop
+//	- removes a certain item from the inventory
+int drop(int backpack[10][2], int ID, int amount)
+{
+	// First check...
+	for(int i = 0; i < 10 ; i++)
+	{
+		// Found item already in backpack array
+		if (backpack[i][0] == ID)
+		{
+			backpack[i][1] -= amount;
+			if (backpack[i][1] == 0)
+				backpack[i][0] = 0;
+			return 0;
+		}
+	}
+
+	// Second check...
+	for(int i = 0; i < 10 ; i++)
+	{
+		// Found empty spot for item in backpack array
+		if (backpack[i][0] == 0)
+		{
+			backpack[i][0] = ID;
+			backpack[i][1] -= amount;
+			printf("aquire(): %dx%d@%d\n", backpack[i][1], backpack[i][0], i);
+			return 0;
+		}
+	}
+
+	return 0;
+}
+
+// print_items
+//	- displays all non-zero items (ID)
+//	- prints: "###  NAMEHERE...\n"...
+void print_items(int backpack[10][2])
+{
+	for (int i = 0; i < 10; i++)
+	{
+		if (backpack[i][0] != 0)
+			printf("%3d  %s\n", backpack[i][1], item_ref[backpack[i][0]].name);
+	}
+
+}
+// print_weapons
+//	- displays all non-zero weapons (ID)
+//	- prints: "###  NAMEHERE...\n"...
+void print_weapons(int backpack[10][2])
+{
+	for (int i = 0; i < 10; i++)
+	{
+		if (backpack[i][0] != 0)
+			printf("%3d  %s\n", backpack[i][1], weapon_ref[backpack[i][0]].name);
+	}
+
+}
+
 ////////////////
 //  COMMANDS  //
 ////////////////
@@ -117,7 +311,7 @@ void split_command(char command[100],char *word[100])
 //// ENTER
 //	- "enter" command
 //	- enters the building on the current tile
-int enter(char map[20][20], int position[2], int health[2])
+int enter(char map[20][20], int position[2], int health[2], float *money, int weapons[5][2], int items[10][2], int equipped_weapon, int equipped_ammo[2])
 {
 
 	char current_tile = map[position[0]][position[1]];
@@ -128,16 +322,27 @@ int enter(char map[20][20], int position[2], int health[2])
 
 	switch (current_tile)
 	{
+		// HOSPITAL
 		case 'H':
 			while (1)
 			{
 				printf("You have entered the hospital.\n");
-				printf("Healing yourself fully will cost: $%.2d.\n" heal_cost);
+				printf("Healing yourself fully will cost: $%.2f.\n", heal_cost);
 				
 				get_command(command);
 				split_command(command, word);
 
-				if ((strcmp("heal", word[0]) == 0) && (health[0] < health[1]))
+				if (word[0] == NULL)
+				{
+					printf("Unrecognized command...\n");
+					pause();
+					return 1;
+				}
+				else if ((strcmp("heal", word[0]) == 0) && (health[0] < health[1]) && (*money <= heal_cost))
+				{
+					printf("You do not have enough money!\n");
+				}
+				else if ((strcmp("heal", word[0]) == 0) && (health[0] < health[1]))
 				{
 					printf("This will cost you: $%.2f. Carry on?  (yes / no)\n", heal_cost);
 					get_command(command);
@@ -146,49 +351,8 @@ int enter(char map[20][20], int position[2], int health[2])
 					if (strcmp("yes", word[0]) == 0)
 					{
 						//Take money
+						*money -= heal_cost;
 						
-						//Heal
-						health[0] = health[1];
-						printf("You have been healed! (NOT REALLY)\n");
-					}
-				}
-				else if (strcmp("exit", word[0]) == 0)
-				{
-					printf("You have exited the building\n");
-					return 0;
-				}
-				else
-				{
-					printf("Command not recognized.\n");
-					pause();
-				}
-					
-			}
-			break;
-		case 'P':
-			while (1)
-			{
-				printf("You have entered the police station.\n");
-				return 0;
-			}
-			break;
-		case 'S':
-			while (1)
-			{
-				clearscr();
-				printf("You have entered the shop.\n");
-
-				get_command(command);
-				split_command(command, word);
-
-				if (strcmp("", word[0]) == 0)
-				{
-					printf("This will cost you: $10. Carry on?  (yes / no)\n");
-					get_command(command);
-					split_command(command, word);
-
-					if (strcmp("yes", word[0]) == 0)
-					{
 						//Heal
 						health[0] = health[1];
 						printf("You have been healed!\n");
@@ -203,9 +367,253 @@ int enter(char map[20][20], int position[2], int health[2])
 				{
 					printf("Command not recognized.\n");
 					pause();
+					clearscr();
+				}
+					
+			}
+			break;
+		// POLICE STATION
+		case 'P':
+			while (1)
+			{
+				printf("\"Hey you shouldn't be in here!\".\n");
+				printf("The police officer escorts you out of the station.");
+				return 0;
+			}
+			break;
+		// GENERAL STORE
+		case 'S':
+			while (1)
+			{
+	
+				printf("You have entered the shop.\n");
+				printl();
+				printf("\"Here's what we've got...\"\n");
+				printl();
+
+				printf("%-15s $%.2f\n", item_ref[shopitem1].name, item_ref[shopitem1].price);
+				printf("%-15s $%.2f\n", item_ref[shopitem2].name, item_ref[shopitem2].price);
+				printf("%-15s $%.2f\n", item_ref[shopitem3].name, item_ref[shopitem3].price);
+				printl();
+
+				get_command(command);
+				split_command(command, word);
+				clearscr();
+
+				if (word[0] == NULL)
+				{
+					printf("Unrecognized command.\n");
+					pause();
+					return 1;
+				}
+				
+				if (strcmp(word[0], "buy") == 0)
+				{
+					if (strcmp(item_ref[shopitem1].name, word[1]) == 0)
+					{
+						if (*money >= item_ref[shopitem1].price)
+						{
+							// Buy shopitem1
+							aquire(items, shopitem1, item_ref[shopitem1].bulk);
+							*money -= item_ref[shopitem1].price;
+							printf("You have bought %s for $%.2f!\n", item_ref[shopitem1].name, item_ref[shopitem1].price);
+							pause();
+							clearscr();
+						}
+						else
+						{
+							printf("You do not have enough money!\n");
+							pause();
+							clearscr();
+						}
+					}
+					else if (strcmp(item_ref[shopitem2].name, word[1]) == 0)
+					{
+						if (*money >= item_ref[shopitem2].price)
+						{
+							// Buy shopitem2
+							aquire(items, shopitem2, item_ref[shopitem2].bulk);
+							*money -= item_ref[shopitem2].price;
+							printf("You have bought %s for $%.2f!\n!", item_ref[shopitem2].name, item_ref[shopitem2].price);
+							pause();
+							clearscr();
+						}
+						else
+						{
+							printf("You do not have enough money!\n");
+							pause();
+							clearscr();
+						}
+					}
+					else if (strcmp(item_ref[shopitem3].name, word[1]) == 0)
+					{
+						if (*money >= item_ref[shopitem3].price)
+						{
+							// Buy shopitem3
+							aquire(items, shopitem3, item_ref[shopitem2].bulk);
+							*money -= item_ref[shopitem3].price;
+							printf("You have bought a %s for $%.2f!\n", item_ref[shopitem3].name, item_ref[shopitem3].price);
+							pause();
+							clearscr();
+						}
+						else
+						{
+							printf("You do not have enough money!\n");
+							pause();
+							clearscr();
+						}
+					}
+					else
+					{
+						printf("\"I don't think we have any of those in stock. Sorry bud.\"\n");
+						pause();
+						clearscr();
+					}
+				}
+				else if (strcmp("exit", word[0]) == 0)
+				{
+					printf("You have exited the building.\n");
+					return 0;
+				}
+				else
+				{
+					printf("Command not recognized.\n");
+					pause();
+					clearscr();
 				}
 
-				return 0;
+				clearscr();
+			}
+			break;
+		case 'G':
+			while (1)
+			{
+	
+				printf("You have entered the gun shop.\n");
+				printl();
+				printf("\"Would you like to see our wares?\"\n");
+				printl();
+
+				printf("%-15s $%.2f\n", weapon_ref[gunshopitem1].name, weapon_ref[gunshopitem1].price);
+				printf("%-15s $%.2f\n", weapon_ref[gunshopitem2].name, weapon_ref[gunshopitem2].price);
+				printf("%-15s $%.2f\n", weapon_ref[gunshopitem3].name, weapon_ref[gunshopitem3].price);
+				printf("%-15s $%.2f\n", item_ref[gunshopammo1].name, item_ref[gunshopammo1].price);
+				printf("%-15s $%.2f\n", item_ref[gunshopammo2].name, item_ref[gunshopammo2].price);
+				printf("%-15s $%.2f\n", item_ref[gunshopammo3].name, item_ref[gunshopammo3].price);
+				printl();
+
+				get_command(command);
+				split_command(command, word);
+				clearscr();
+
+				if (word[0] == NULL)
+				{
+					printf("Unrecognized command.\n");
+					pause();
+					return 1;
+				}
+				
+				if (strcmp(word[0], "buy") == 0)
+				{
+					//// WEAPONS
+					if (strcmp(weapon_ref[gunshopitem1].name, word[1]) == 0)
+					{
+						if (*money >= weapon_ref[gunshopitem1].price)
+						{
+							// Buy shopitem1
+							aquire(weapons, gunshopitem1, 1);
+							*money -= weapon_ref[gunshopitem1].price;
+							printf("You have bought %s for $%.2f!\n", weapon_ref[gunshopitem1].name, weapon_ref[gunshopitem1].price);
+							pause();
+							clearscr();
+						}
+						else
+						{
+							printf("You do not have enough money!\n");
+							pause();
+							clearscr();
+						}
+					}
+					else if (strcmp(weapon_ref[gunshopitem2].name, word[1]) == 0)
+					{
+						if (*money >= weapon_ref[gunshopitem2].price)
+						{
+							// Buy shopitem2
+							aquire(weapons, gunshopitem2, 1);
+							*money -= weapon_ref[gunshopitem2].price;
+							printf("You have bought %s for $%.2f!\n", weapon_ref[gunshopitem2].name, weapon_ref[gunshopitem2].price);
+							pause();
+							clearscr();
+						}
+						else
+						{
+							printf("You do not have enough money!\n");
+							pause();
+							clearscr();
+						}
+					}
+					else if (strcmp(weapon_ref[gunshopitem3].name, word[1]) == 0)
+					{
+						if (*money >= weapon_ref[gunshopitem3].price)
+						{
+							// Buy shopitem3
+							aquire(weapons, gunshopitem3, 1);
+							*money -= weapon_ref[gunshopitem3].price;
+							printf("You have bought a %s for $%.2f!\n", weapon_ref[gunshopitem3].name, weapon_ref[gunshopitem3].price);
+							pause();
+							clearscr();
+						}
+						else
+						{
+							printf("You do not have enough money!\n");
+							pause();
+							clearscr();
+						}
+					}
+					//// AMMO
+					else if (strcmp(item_ref[gunshopammo1].name, word[1]) == 0)
+					{
+						if (*money >= item_ref[gunshopammo1].price)
+						{
+							// Buy gunshopammo1
+							// If you have it equipped already...
+							if ((item_ref[gunshopammo1].ammo == 1) && (equipped_ammo[0] == gunshopammo1))
+								equipped_ammo[1] += item_ref[gunshopammo1].bulk;
+							// Normally add it to the inventory
+							else
+								aquire(items, gunshopammo1, item_ref[gunshopammo1].bulk);
+							*money -= item_ref[gunshopammo1].price;
+							printf("You have bought %d %s ammo for $%.2f!\n", item_ref[gunshopammo1].bulk, item_ref[gunshopammo1].name, item_ref[gunshopammo1].price);
+							pause();
+							clearscr();
+						}
+						else
+						{
+							printf("You do not have enough money!\n");
+							pause();
+							clearscr();
+						}
+					}
+					else
+					{
+						printf("\"Sorry I can't get any of those here (them new laws you know!).\"\n");
+						pause();
+						clearscr();
+					}
+				}
+				else if (strcmp("exit", word[0]) == 0)
+				{
+					printf("You have exited the building.\n");
+					return 0;
+				}
+				else
+				{
+					printf("Command not recognized.\n");
+					pause();
+					clearscr();
+				}
+
+				clearscr();
 			}
 			break;
 		default:
@@ -215,19 +623,159 @@ int enter(char map[20][20], int position[2], int health[2])
 	
 }
 
+//// HELP
+//	- "help" command
+//	- displays common commands
+void help()
+{
+	printf("Here are some common commands:\n"
+		   "\n"
+		   "enter\t\t\t - enter the building on the current tile\n"
+		   "help\t\t\t - bring up a list of common commands\n"
+		   "inventory\t\t - prints the players inventory\n"
+		   "map\t\t\t - display a map of the city\n"
+		   "tile info\t\t - show information on the current tile\n"
+		   "walk [direction]\t - walk in the specified direction\n"
+		   "\t\n"
+		   "\t\n");
+	pause();
+	clearscr();
+}
+
 //// INVENTORY
 //	- "inventory" command
 //	- presents the user his/her inventory including stats and weapons
-void inventory(int position[2], char *name, int health[2], float money, char *word)
+int inventory(int position[2], char *name, int health[2], float money, int equipped_weapon, int equipped_ammo[2], int weapons[10][2], int items[10][2])
 {
+
+	char command[100];
+	char *word[100];
+
+	int temp_ammo[2] = {0,0};		// {ID, AMOUNT}
+
+	while (1)
+	{	
+		printf("Name: %s\n", name);
+		printf("Position: %d, %d \n", position[0], position[1]);
+		printf("Health: %d / %d\n", health[0], health[1]);
+		printf("Money: $%.2f\n", money);
+		printl();
+		printf("You have these equipped:\n");
+		printf("%s\n", weapon_ref[equipped_weapon].name);
+		printf("%d %s\n", equipped_ammo[1], item_ref[equipped_ammo[0]].name);
+		printl();
+		printf("You are carrying:\n");
+		print_weapons(weapons);
+		printl();
+		print_items(items);
+		printl();
+		printl();
+		
+		get_command(command);
+		split_command(command, word);
+		
+		if (word[0] == NULL)
+		{
+			printf("Command not recognized.");
+			pause();
+		}
+		else if (strcmp("equip", word[0]) == 0)
+		{
+			// WEAPON
+			for (int i = 0; i < NUM_OF_WEAPONS; i++)
+			{
+				if (strcmp(weapon_ref[i].name, word[1]) == 0)
+				{
+					// Add currently equipped weapon back into inventory
+					aquire(weapons, equipped_weapon, 1);
+
+					// Set new equipped weapon ID
+					equipped_weapon = i;
+
+					// Remove equipped weapon from inventory
+					drop(weapons, i, 1);
+					// Reset the ID to 0
+					weapons[i][0] = 0;
+					// Decrease the amount by one
+					weapons[i][1] -= 1;
+
+					printf("You have equiped your %s", weapon_ref[i].name);
+					pause();
+					break;
+				}
+			}
+			// AMMO
+			// - equips ALL ammo of that type.
+			for (int i = 0; i < NUM_OF_ITEMS; i++)
+			{
+				if (strcmp(item_ref[i].name, word[1]) == 0)
+				{
+					if (items[i][0] == 0)
+					{
+						printf("You have equiped your %s", item_ref[i].name);
+						pause();
+						break;
+					}
+					else
+					{
+						// Add ammo back into inventory
+						aquire(items, equipped_ammo[0], equipped_ammo[1]);
+						// temperary store amount and ID
+						temp_ammo[0] = equipped_ammo[0];
+						temp_ammo[1] = equipped_ammo[1];
+
+						// Set equipped ammo ID
+						equipped_ammo[0] = i;
+						// Set equipped ammo amount
+						equipped_ammo[1] = items[i][1];
+
+						//drop(items, i, 1);
+						// Set item equipped in inventory all to 0
+						items[i][0] = 0;
+						items[i][1] = 0;
+
+						printf("You have equiped your %s", item_ref[i].name);
+						pause();
+						break;
+					}/*
+
+					// Add currently equipped weapon back into inventory
+					aquire(items, equipped_ammo, equipped_ammo[1]);
+
+					// Set new equipped weapon ID
+					equipped_item = i;
+
+					// Remove equipped weapon from inventory
+					drop(items, i, equipped_ammo[1]);
+					// Reset the ID to 0
+					items[i][0] = 0;
+					// Decrease the amount by one
+					items[i][1] = 0;
+
+					printf("You have equiped your %s", weapon_ref[i].name);
+					pause();
+					break;*/
+				}
+			}
+		}
+		else if (strcmp("use", word[0]) == 0)
+		{
+			return 1;
+		}
+		else if (strcmp("exit", word[0]) == 0)
+		{
+			return 1;
+		}
+		else
+		{
+			printf("Command not recognized.");
+			pause();
+		}
+
+		clearscr();
+	}
 	clearscr();
-	printf("Name: %s\n", name);
-	printf("Position: %d, %d \n", position[0], position[1]);
-	printf("Health: %d / %d\n", health[0], health[1]);
-	printf("Money: $%.2f\n", money);
-	printl();
-	pause();
-	clearscr();
+	return 0;
 }
 
 //// MAP
@@ -338,7 +886,7 @@ int move(char *direction, int position[2])
 		position[1]++;
 	else
 	{
-		printf("Direction not recognized\n");
+		printf("Direction not recognized or unable to move in that direction.\n");
 		pause();
 	}
 
@@ -362,7 +910,7 @@ int check_command(char *word[100], struct playercharacteristics * player)
 		return 1;
 	// ENTER
 	else if (strcmp("enter", word[0]) == 0)
-		enter(player->map, player->position, player->health);
+		enter(player->map, player->position, player->health, &player->money, player->weapons, player->items, player->equipped_weapon, player->equipped_ammo);
 	// EXIT
 	else if ((strcmp("exit", word[0]) == 0) || (strcmp("quit", word[0]) == 0))
 	{
@@ -370,9 +918,12 @@ int check_command(char *word[100], struct playercharacteristics * player)
 		pause();
 		exit(0);
 	}
+	// HELP
+	else if (strcmp("help", word[0]) == 0)
+		help();
 	// INVENTORY
 	else if (strcmp("inventory", word[0]) == 0)
-		inventory(player->position, player->name, player->health, player->money, *word);
+		inventory(player->position, player->name, player->health, player->money, player->equipped_weapon, player->equipped_ammo, player->weapons, player->items);
 	// MAP
 	else if (strcmp("map", word[0]) == 0)
 		print_map(player->map, player->position, word);
@@ -382,6 +933,7 @@ int check_command(char *word[100], struct playercharacteristics * player)
 	// WALK
 	else if (strcmp("walk", word[0]) == 0)
 		move(word[1], player->position);
+	// NO COMMAND
 	else
 	{
 		printf("Command not recognized.\n");
@@ -402,9 +954,9 @@ int main(void)
 		{0, 0},
 		// Map
 		{
-			{"+=======+==========+"},
-			{"|       |          |"},
-			{"|       |          |"},
+			{"G=======+==========+"},
+			{"|SHP    |G         |"},
+			{"|G      |          |"},
 			{"|=======+==========|"},
 			{"|       |PP        |"},
 			{"|       |PP        |"},
@@ -413,22 +965,20 @@ int main(void)
 			{"|       |HH        |"},
 			{"|       +====+     |"},
 			{"|=======+    |     |"},
-			{"|       |    |SS   |"},
+			{"|     GG|    |SS   |"},
 			{"|       |    +=====|"},
 			{"|       |          |"},
 			{"|=======+          |"},
-			{"|                  |"},
-			{"|         o====+===|"},
+			{"|       HHH        |"},
+			{"|        Ho====+===|"},
 			{"|   PPP        |   |"},
 			{"|   PPP        |   |"},
 			{"+==============+===+"}
-		},
-		
+		},		
 		// Health (actual, full)
 		{50, 100},
-
 		// Money
-		100,
+		10000.00,
 		
 		// Skill_points;
 		10,
@@ -439,8 +989,49 @@ int main(void)
 		// Charisma;
 		1,
 
+		// Equipped Weapon
+		0,
+		// Equipped Ammo
+		{0,0},
+		// Weapons
+		{
+			{0,0},
+			{0,0},
+			{0,0},
+			{0,0},
+			{0,0},
+			{0,0},
+			{0,0},
+			{0,0},
+			{0,0},
+			{0,0},	
+		},		
+		// Items
+ 		{
+			{0, 0},
+			{0, 0},
+			{0, 0},
+			{0, 0},
+			{0, 0},
+			{0, 0},
+			{0, 0},
+			{0, 0},
+			{0, 0},
+			{0, 0}
+		}
 	};
 
+	// Command list
+	char commandlist[MAX_COMMAND_LENGTH][NUM_OF_COMMANDS]=
+	{
+		{"enter"},
+		{"exit"},
+		{"help"},
+		{"inv"},
+		{"map"},
+		{"tile"},
+		{"walk"}
+	};
 
 	// Command
 	char command[100];
@@ -452,6 +1043,7 @@ int main(void)
 	// Main Menu
 	do
 	{
+		clearscr();
 		printf("Urban Sprawl\n");
 		printf("By: Sami Volk	2012\n");
 		pause();
@@ -470,7 +1062,7 @@ int main(void)
 			{
 				printf("Good bye!");
 				pause();
-				return 0;
+				exit(0);
 			}
 			else if (strcmp("new", command) == 0)
 			{
@@ -480,6 +1072,12 @@ int main(void)
 				clearscr();
 				break;
 			}
+			else
+			{
+				printf("Command not recognized.\n");
+				pause();
+			}
+			
 		}while (1);
 
 		break;
