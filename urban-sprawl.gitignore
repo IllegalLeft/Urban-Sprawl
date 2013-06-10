@@ -1,0 +1,14 @@
+#Ignore these file types
+
+#Codeblocks files
+/obj/*
+/bin/*
+*.layout
+*.depend
+
+#GCC files
+*.o
+*.cpb
+*.swp
+/CON/*
+urbansprawl
