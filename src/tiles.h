@@ -1,26 +1,33 @@
 /*
-	Here is where the tile stuff is...
-*/
+ * Tiles.h
+ *
+ * Here is where the tile stuff is...
+ */
+
+#ifndef TILES_H
+#define TILES_H
 
 // '#' = 35		Character
-#define character	35
+#define character	'#'
 // '=' = 61		Horizontal road
-#define hroad		61
+#define hroad		'='
 // '|' = 124 	Vertical road
-#define vroad		124
+#define vroad		'|'
 // '+' = 43		Road crossing
-#define crossing	43
+#define crossing	'+'
 // 'o' =   		Turn-around
-#define roundabout	111
+#define roundabout	'o'
 // 'H' = 72		Hospital
-#define hospital	72
+#define hospital	'H'
 // 'P' = 80		Police
-#define police		80
+#define police		'P'
 // 'S' = 83		General Store
-#define shop		83
+#define shop		'S'
 // 'L' = ##		Liquor Store
-//#define LCBO ##
+//#define LCBO 
 // 'G' = ##		Gun Shop
 //#define gunstore ##
 // '&' = 38		Debris
 //#define debris ##
+
+#endif

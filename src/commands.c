@@ -1,11 +1,14 @@
 /*
-	Actual command code
+ * Commands.c
+ *
+ * command related code
 */
-// STANDARD HEADERS
 #include <stdio.h>
+#include <string.h>
 
-// CUSTOM HEADERS
+#include "commands.h"
 #include "objects.h"
+#include "screen.h"
 #include "tiles.h"
 //#include "types.h"
 

@@ -1,10 +1,14 @@
 /*
-	type definitions of objects in the world
-*/
+ * Types.h
+ *
+ * type definitions of objects in the world
+ */
 
-//CUSTOM HEADERS
+
+#ifndef TYPES_H
+#define TYPES_H
+
 #include "objects.h"
-
 
 struct person
 {
@@ -66,3 +70,5 @@ struct weapon
 	{5, "rifle", 22, 7, 329.99}
 };
 */
+
+#endif

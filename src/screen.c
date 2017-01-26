@@ -1,11 +1,9 @@
 /*
+ * Screen.c
+ *
+ * Samuel Volk, 2013
+ */
 
-    Screen.c
-
-    Samuel Volk, 2013
-*/
-
-#include "screen.h"
 #include <stdio.h>
 
 // printl

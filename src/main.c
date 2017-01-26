@@ -36,18 +36,16 @@ BUGS:
 */
 #define MAX_COMMAND_LENGTH	10
 
-// STANDARD HEADERS
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 
-// CUSTOM HEADERS
-#include "tiles.h"
-#include "objects.h"
-#include "types.h"
-#include "screen.h"
 #include "commands.h"
+#include "objects.h"
+#include "screen.h"
+#include "tiles.h"
+#include "types.h"
 
 /*
 // printl
@@ -434,7 +432,7 @@ int main(void)
 		//tile_info(player.map, player.position);
 		//printl();
 
-		sprintf(cmdprompt, "\033[22;31m%d/%d \033[22;37m>>", player.health[0], player.health[1]);
+		sprintf(cmdprompt, "\033[22;31m%d/%d \033[22;37m>> ", player.health[0], player.health[1]);
 		//printf("%s\n", cmdprompt);
 
 		get_command(cmdprompt,command);

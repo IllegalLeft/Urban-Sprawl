@@ -1,6 +1,10 @@
 /*
-	This is where the objects are stored.
-*/
+ * Objects.h
+ */
+
+
+#ifndef OBJECTS_H
+#define OBJECTS_H
 
 // Number of Items
 #define NUM_OF_ITEMS	8
@@ -19,3 +23,5 @@
 #define gunshopammo1	5
 #define gunshopammo2	6
 #define gunshopammo3	7
+
+#endif
