@@ -47,34 +47,8 @@ BUGS:
 #include "tiles.h"
 #include "types.h"
 
-/*
-// printl
-//	- prints a new line only
-void printl()
-{
-	printf("\n");
-}
-// clearscr
-//	- prints a large amount of new lines to free up screen space
-int clearscr()
-{
-	int i = 0;
-	for (i = 0; i < 50; i++)
-		printf("\n");
-
-	return 0;
-}
-//
-// pause
-void pause()
-{
-	printf("\nPress Enter...\n");
-	scanf("%*c");
-	fflush(stdin);
-}*/
 
 ////////////////
-
 // get_command
 //	- receives the command from the user
 void get_command(char *prompt, char command[100])
@@ -241,7 +215,6 @@ int check_command(char *word[100], struct person *player)
 	else if ((strcmp("exit", word[0]) == 0) || (strcmp("quit", word[0]) == 0))
 	{
 		printf("Good bye!");
-		pause();
 		exit(0);
 	}
 	// HELP
@@ -261,10 +234,7 @@ int check_command(char *word[100], struct person *player)
 		move(word[1], player->position);
 	// NO COMMAND
 	else
-	{
 		printf("Command not recognized.\n");
-		pause();
-	}
 
 	return 0;
 }
@@ -348,7 +318,7 @@ int main(void)
 	};
 
 	// Command list
-	char commandlist[MAX_COMMAND_LENGTH][NUM_OF_COMMANDS]=
+	/*char commandlist[MAX_COMMAND_LENGTH][NUM_OF_COMMANDS]=
 	{
 		{"enter"},
 		{"exit"},
@@ -357,7 +327,7 @@ int main(void)
 		{"map"},
 		{"tile"},
 		{"walk"}
-	};
+	};*/
 
 	// Command
 	char command[100];
@@ -378,24 +348,22 @@ int main(void)
 	{
 		clearscr();
 		printf("Urban Sprawl\n");
-		printl();
-		printf("By: Sami Volk	2012\n");
+		printf("By: Sami Volk	2012-2017\n");
 		pause();
-		//clearscr();
+
+        printf("Please type in one of the commands: \n");
+
 		do
 		{
-			printf("Please type in one of the commands: \n");
-			printf("NEW - starts a new game \t\t");
-			printf("QUIT - quits game\n");
+            printf("NEW - starts a new game\t\t");
+            printf("QUIT - quits game\n");
 
 			get_command(">> ",command);
-			//clearscr();
 
 			// check for "exit" command.
 			if ((strcmp("exit", command) == 0) || (strcmp("quit", command) == 0))
 			{
 				printf("Good bye!");
-				pause();
 				exit(0);
 			}
 			else if (strcmp("new", command) == 0)
@@ -403,13 +371,11 @@ int main(void)
 				printf("What is your name?\n");
 				fgets(player.name, 100, stdin);
 				fflush(stdin);
-				//clearscr();
 				break;
 			}
 			else
 			{
 				printf("Command not recognized.\n");
-				pause();
 			}
 
 		}while (1);
@@ -438,7 +404,6 @@ int main(void)
 		get_command(cmdprompt,command);
 		split_command(command, word);
 		check_command(word, &player);
-		printl();
 
 	} while (1);
 

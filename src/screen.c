@@ -16,8 +16,8 @@ void printl()
 //	- prints a large amount of new lines to free up screen space
 int clearscr()
 {
-	int i = 0;
-	for (i = 0; i < 50; i++)
+	//int i = 0;
+	//for (i = 0; i < 50; i++)
 		printf("\n");
 
 	return 0;
